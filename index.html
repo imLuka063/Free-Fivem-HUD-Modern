@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAST STAND — HUD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/hud.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/editor.css" />
+</head>
+<body class="hud-root">
+
+  <!-- Decorative cinematic frame (corner brackets + vignette) -->
+  <div class="cinematic-frame" aria-hidden="true">
+    <span class="bracket tl"></span><span class="bracket tr"></span>
+    <span class="bracket bl"></span><span class="bracket br"></span>
+    <span class="vignette"></span>
+    <span class="scanlines"></span>
+  </div>
+
+  <!-- ===================== HEADER (LOGO + SERVER NAME) ===================== -->
+  <div class="hud-element" id="hud-header" data-hud="header">
+    <div class="brand">
+      <div class="brand-shield">
+        <img src="files/noback.png" alt="Logo" />
+      </div>
+      <div class="brand-divider"></div>
+      <div class="brand-text">
+        <div class="brand-row">
+          <div class="brand-name">LAST&nbsp;</div>
+          <span class="brand-badge">STAND</span>
+        </div>
+        <div class="brand-meta">
+          <span class="status-dot"></span>
+          <span class="brand-tag">DISCORD.GG/LASTSTAND</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ANNOUNCEMENT BANNER ===================== -->
+  <div class="hud-element announcement hidden" id="announcement" data-hud="announcement">
+    <div class="announcement-icon" id="announcement-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+    </div>
+    <div class="announcement-body">
+      <div class="announcement-title" id="announcement-title">Announcement</div>
+      <div class="announcement-message" id="announcement-message">Message body</div>
+    </div>
+    <div class="announcement-stamp">SYS</div>
+    <div class="announcement-progress"><span id="announcement-progress-bar"></span></div>
+  </div>
+
+  <!-- ===================== HELP NOTIFICATION ===================== -->
+  <div class="hud-element help-box hidden" id="help" data-hud="help">
+    <div class="help-key" id="help-key">E</div>
+    <div class="help-text" id="help-text">Interact</div>
+  </div>
+
+  <!-- ===================== NOTIFICATION STACK ===================== -->
+  <div class="hud-element notify-container" id="notifications" data-hud="notifications"></div>
+
+  <!-- ===================== PROGRESS BAR (SEGMENTED) ===================== -->
+  <div class="hud-element progress-wrap hidden" id="progress" data-hud="progress">
+    <div class="progress-container">
+      <div class="progress-icon" id="progress-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="progress-content">
+        <div class="progress-label" id="progress-label">Loading...</div>
+        <div class="progress-segments" id="progress-segments">
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+          <div class="segment"></div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-hint" id="progress-hint">Press <b>X</b> to cancel</div>
+  </div>
+
+  <!-- ===================== MONEY DISPLAY ===================== -->
+  <div class="hud-element money-pill" id="money-cash" data-hud="money-cash">
+    <div class="money-info">
+      <span class="money-label">CASH</span>
+      <span class="money-value" id="money-cash-value">0</span>
+    </div>
+    <span class="money-icon">$</span>
+  </div>
+
+  <div class="hud-element money-pill" id="money-bank" data-hud="money-bank">
+    <div class="money-info">
+      <span class="money-label">BANK</span>
+      <span class="money-value" id="money-bank-value">0</span>
+    </div>
+    <span class="money-icon">⌂</span>
+  </div>
+
+  <div class="hud-element money-pill" id="money-black" data-hud="money-black">
+    <div class="money-info">
+      <span class="money-label">BLACK</span>
+      <span class="money-value" id="money-black-value">0</span>
+    </div>
+    <span class="money-icon">◆</span>
+  </div>
+
+  <!-- ===================== ID DISPLAY ===================== -->
+  <div class="hud-element id-pill" id="player-id" data-hud="id">
+    <div class="id-row">
+      <span class="id-label">ID:</span>
+      <span class="id-value" id="id-value">0</span>
+    </div>
+  </div>
+
+  <!-- ===================== HUNGER / THIRST (BUBBLE TICK-TAK) ===================== -->
+  <div class="hud-element status-stack" id="status" data-hud="status">
+    <div class="status-bubbles" data-kind="hunger">
+      <div class="bubbles-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 15h16a1 1 0 011 1v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-1a1 1 0 011-1zM5 12h14M7 12V9a5 5 0 0110 0v3M4 15h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="bubbles-track" id="hunger-bubbles">
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+      </div>
+    </div>
+    <div class="status-bubbles" data-kind="thirst">
+      <div class="bubbles-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3c-4 6-6 9-6 12a6 6 0 0012 0c0-3-2-6-6-12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="bubbles-track" id="thirst-bubbles">
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+        <span class="bubble-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VOICE RANGE ===================== -->
+  <div class="hud-element voice-pill" id="voice" data-hud="voice">
+    <div class="voice-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 3a4 4 0 014 4v5a4 4 0 01-8 0V7a4 4 0 014-4zM5 11a7 7 0 0014 0M12 18v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div class="voice-info">
+      <div class="voice-head">
+        <span class="voice-label" id="voice-label">Normal</span>
+        <span class="voice-meta" id="voice-meta">15M</span>
+      </div>
+      <div class="voice-tiers" id="voice-tiers">
+        <span class="tier"></span><span class="tier active"></span><span class="tier"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== JOB ===================== -->
+  <div class="hud-element job-pill" id="job" data-hud="job">
+    <div class="job-info">
+      <span class="job-name" id="job-name">Unemployed</span>
+      <span class="job-grade" id="job-grade">G0</span>
+    </div>
+  </div>
+
+  <!-- ===================== TIME / DATE ===================== -->
+  <div class="hud-element clock" id="clock" data-hud="clock">
+    <div class="clock-row">
+      <div class="clock-time" id="clock-time">00:00</div>
+      <div class="clock-sec"><span id="clock-sec-fill"></span></div>
+    </div>
+    <div class="clock-date" id="clock-date">01.01.2025</div>
+  </div>
+
+  <!-- ===================== LOCATION ===================== -->
+  <div class="hud-element location" id="location" data-hud="location">
+    <div class="location-pin">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.5" fill="currentColor"/></svg>
+    </div>
+    <div class="location-text">
+      <div class="location-row">
+        <div class="location-street" id="location-street">Vinewood Blvd</div>
+        <div class="location-bearing" id="location-bearing">N</div>
+      </div>
+      <div class="location-area" id="location-area">Vinewood</div>
+    </div>
+  </div>
+
+  <!-- ===================== HUD EDITOR OVERLAY ===================== -->
+  <div class="editor-overlay hidden" id="editor">
+    <div class="editor-backdrop"></div>
+    <aside class="editor-panel">
+      <header class="editor-head">
+        <div class="editor-title">
+          <span class="dot"></span>
+          <div>
+            <div class="editor-eyebrow">LAST STAND · v1</div>
+            <h2>HUD&nbsp;CUSTOMIZATION</h2>
+          </div>
+        </div>
+        <button class="icon-btn" id="editor-close" title="Close (Esc)">✕</button>
+      </header>
+
+      <nav class="editor-tabs" role="tablist">
+        <button class="tab active" data-tab="general">General</button>
+        <button class="tab" data-tab="modules">Modules</button>
+        <button class="tab" data-tab="layout">Layout</button>
+      </nav>
+
+      <div class="editor-body">
+        <!-- GENERAL -->
+        <section class="tab-panel active" data-panel="general">
+          <div class="editor-section">
+            <h3>Master Controls</h3>
+            <label class="switch-row">
+              <span>HUD Enabled <em>(global)</em></span>
+              <input type="checkbox" id="toggle-master" checked />
+              <span class="switch"></span>
+            </label>
+            <label class="switch-row">
+              <span>Cinematic / Kino Mode <em>(hide all)</em></span>
+              <input type="checkbox" id="toggle-kino" />
+              <span class="switch"></span>
+            </label>
+            <label class="switch-row">
+              <span>Snap to Grid <em>(20px)</em></span>
+              <input type="checkbox" id="toggle-grid" checked />
+              <span class="switch"></span>
+            </label>
+          </div>
+          <div class="editor-section">
+            <h3>Quick Actions</h3>
+            <div class="quick-grid">
+              <button class="chip" data-quick="notify">Test Notify</button>
+              <button class="chip" data-quick="announce">Announcement</button>
+              <button class="chip" data-quick="help">Help Prompt</button>
+              <button class="chip" data-quick="progress">Progress 5s</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- MODULES -->
+        <section class="tab-panel" data-panel="modules">
+          <div class="editor-section">
+            <h3>Filter</h3>
+            <input type="text" class="search" id="module-search" placeholder="Search modules…" />
+          </div>
+          <div class="editor-section flex">
+            <h3>Visible Elements</h3>
+            <div class="element-toggles" id="element-toggles"></div>
+          </div>
+        </section>
+
+        <!-- LAYOUT -->
+        <section class="tab-panel" data-panel="layout">
+          <div class="editor-section">
+            <h3>How it works</h3>
+            <p class="hint-text">Drag any HUD element to a new position. Snap-to-grid is enabled by default. Press <kbd>Esc</kbd> or click ✕ to exit. Use Save to persist, or Reset to restore the default tactical layout.</p>
+          </div>
+          <div class="editor-section">
+            <h3>Keybinds</h3>
+            <ul class="keybinds">
+              <li><kbd>H</kbd> <span>Open / close editor</span></li>
+              <li><kbd>X</kbd> <span>Cancel current progress</span></li>
+              <li><kbd>Esc</kbd> <span>Close editor</span></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <footer class="editor-actions">
+        <button class="btn ghost" id="btn-reset">Reset</button>
+        <button class="btn primary" id="btn-save">
+          <span>Save Layout</span>
+          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </footer>
+    </aside>
+  </div>
+
+  <div class="grid-overlay hidden" id="grid-overlay"></div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/announcement.js"></script>
+  <script src="js/help.js"></script>
+  <script src="js/progress.js"></script>
+  <script src="js/status.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

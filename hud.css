@@ -1,0 +1,177 @@
+/* =====================================================
+   LAST STAND — HUD Core
+   Engineered, restrained, premium. Blood red on graphite.
+   ===================================================== */
+
+:root {
+  /* Brand */
+  --ls-red:        #e11d2e;
+  --ls-red-hot:    #ff3848;
+  --ls-red-deep:   #7a0d18;
+  --ls-red-soft:   rgba(225, 29, 46, 0.10);
+  --ls-red-edge:   rgba(225, 29, 46, 0.32);
+  --ls-red-glow:   rgba(225, 29, 46, 0.45);
+
+  /* Surfaces — graphite system */
+  --ls-ink:        #050608;
+  --ls-graphite:   #0c0e12;
+  --ls-graphite-2: #14171c;
+  --ls-charcoal:   #1c1f25;
+  --ls-panel:      rgba(14, 16, 20, 0.40);
+  --ls-panel-2:    rgba(20, 23, 28, 0.40);
+
+  /* Hairlines */
+  --ls-hair:       rgba(255, 255, 255, 0.06);
+  --ls-hair-2:     rgba(255, 255, 255, 0.10);
+  --ls-hair-hot:   rgba(225, 29, 46, 0.35);
+
+  /* Text */
+  --ls-white:      #f2f3f5;
+  --ls-silver:     #c9ccd2;
+  --ls-mute:       #8a8f99;
+  --ls-dim:        #5a5f6a;
+
+  /* State accents (used sparingly) */
+  --ls-success:    #2bd47a;
+  --ls-error:      #ff4754;
+  --ls-info:       #f0b32a;
+  --ls-team:       #4ab8e8;
+
+  /* System */
+  --ls-shadow-sm:  0 4px 14px rgba(0,0,0,.35);
+  --ls-shadow:     0 14px 40px rgba(0,0,0,.5);
+  --ls-radius:     6px;
+  --ls-radius-sm:  4px;
+  --ls-blur:       0;
+  --ls-ease:       cubic-bezier(.22, .61, .36, 1);
+  --ls-ease-out:   cubic-bezier(.16, 1, .3, 1);
+
+  /* Type */
+  --ls-font:       'Inter', 'Segoe UI', system-ui, sans-serif;
+  --ls-display:    'Rajdhani', 'Inter', sans-serif;
+  --ls-mono:       'JetBrains Mono', 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: var(--ls-white);
+  font-family: var(--ls-font);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  user-select: none;
+}
+button { font-family: inherit; }
+
+/* In-browser preview only — disciplined dark backdrop */
+body.preview {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(225,29,46,.05), transparent 60%),
+    radial-gradient(ellipse at 50% -20%, #14171c 0%, #0a0c0f 55%, #050608 100%);
+}
+body.preview::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+/* Cinematic frame — minimal corner ticks */
+.cinematic-frame { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+.cinematic-frame .bracket {
+  position: absolute; width: 18px; height: 18px;
+  border: 1px solid rgba(225,29,46,.45);
+}
+.cinematic-frame .bracket.tl { top: 14px; left: 14px; border-right: 0; border-bottom: 0; }
+.cinematic-frame .bracket.tr { top: 14px; right: 14px; border-left: 0; border-bottom: 0; }
+.cinematic-frame .bracket.bl { bottom: 14px; left: 14px; border-right: 0; border-top: 0; }
+.cinematic-frame .bracket.br { bottom: 14px; right: 14px; border-left: 0; border-top: 0; }
+.cinematic-frame .vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 50% 50%, transparent 65%, rgba(0,0,0,.45) 100%);
+}
+.cinematic-frame .scanlines { display: none; }
+
+.hud-root.kino .hud-element:not(.editor-overlay):not(.grid-overlay) { opacity: 0; pointer-events: none; }
+.hud-root.kino .cinematic-frame { opacity: 0; }
+.hud-root.off  .hud-element:not(.editor-overlay):not(.grid-overlay) { display: none !important; }
+.hud-root.off  .cinematic-frame { display: none; }
+
+/* ----- Generic HUD element ----- */
+.hud-element {
+  position: fixed;
+  z-index: 10;
+  transition: opacity .2s var(--ls-ease), transform .2s var(--ls-ease);
+}
+.hud-element.hidden,
+.hud-element[data-disabled="true"] { display: none !important; }
+
+/* Default positions (overridden by editor save) */
+#hud-header   { top: 18px;  right: 18px; }
+#announcement { top: 40px;  left: 50%;  transform: translateX(-50%); }
+#help         { bottom: 30px; left: 50%; transform: translateX(-50%); }
+#notifications{ bottom: 80px; left: 50%; transform: translateX(-50%); width: 360px; }
+#progress     { bottom: 15px; left: 50%; transform: translateX(-50%); width: 420px; z-index: 50; }
+#money-cash   { top: 105px !important; right: 18px !important; left: auto !important; bottom: auto !important; }
+#money-bank   { top: 135px !important; right: 18px !important; left: auto !important; bottom: auto !important; }
+#money-black  { top: 165px !important; right: 18px !important; left: auto !important; bottom: auto !important; }
+#player-id    { top: 90px;  left: 18px; }
+#status       { top: 120px; left: -5px; }
+#voice        { bottom: 30px;  left: 306px; }
+#job          { bottom: 170px; left: 306px; }
+#clock        { top: 18px;     left: 18px; }
+#location     { bottom: 100px; left: 306px; }
+
+.hud-element.draggable { cursor: grab; }
+.hud-element.dragging  {
+  cursor: grabbing; transform: none !important;
+  outline: 1px dashed var(--ls-red); outline-offset: 6px;
+  z-index: 9000;
+}
+.hud-element.editing {
+  outline: 1px dashed rgba(225,29,46,.35);
+  outline-offset: 6px;
+  border-radius: var(--ls-radius);
+}
+.hud-element.editing::after {
+  content: attr(data-hud);
+  position: absolute; top: -22px; left: 0;
+  font: 600 9px/1 var(--ls-mono);
+  letter-spacing: .22em; color: var(--ls-red);
+  text-transform: uppercase;
+  background: var(--ls-graphite);
+  padding: 4px 7px;
+  border: 1px solid var(--ls-hair-hot);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* Grid overlay during editor */
+.grid-overlay {
+  position: fixed; inset: 0; z-index: 5;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: radial-gradient(ellipse at center, black 60%, transparent 100%);
+}
+.grid-overlay.hidden { display: none; }
+
+/* Animations — restrained, cubic ease-out only */
+@keyframes ls-fadeUp   { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+@keyframes ls-fadeIn   { from { opacity:0; } to { opacity:1; } }
+@keyframes ls-slideDn  { from { opacity:0; transform: translate(-50%, -10px); } to { opacity:1; transform: translate(-50%, 0); } }
+@keyframes ls-slideUp  { from { opacity:0; transform: translate(-50%, 8px); } to { opacity:1; transform: translate(-50%, 0); } }
+@keyframes ls-slideRt  { from { opacity:0; transform: translateX(14px); } to { opacity:1; transform: none; } }
+@keyframes ls-slideOut { to   { opacity:0; transform: translateX(14px); } }
+@keyframes ls-dot      { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
